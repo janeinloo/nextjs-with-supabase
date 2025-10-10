@@ -2,81 +2,46 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import NoteFormClient from "./clientside/NoteFormClient";
+import NoteListClient, { Note } from "./clientside/NoteListClient";
 
-type Note = { id: number; title: string; created_at: string };
-
-export default function ClientNotes() {
+export default function Clientpage() {
   const supabase = createClient();
   const [notes, setNotes] = useState<Note[]>([]);
-  const [title, setTitle] = useState("");
 
-  // Fetch notes
   useEffect(() => {
     fetchNotes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function fetchNotes() {
+  const fetchNotes = async () => {
     const { data } = await supabase
       .from("notes")
-      .select("id,title,created_at")
+      .select("id, title, created_at")
       .order("created_at", { ascending: false });
     setNotes(data ?? []);
-  }
+  };
 
-  // Create note
-  async function addNote(e: React.FormEvent) {
-    e.preventDefault();
-    if (!title.trim()) return;
+  const addNote = async (title: string) => {
     await supabase.from("notes").insert({ title });
-    setTitle("");
     fetchNotes();
-  }
+  };
 
-  // Delete note
-  async function deleteNote(id: number) {
+  const deleteNote = async (id: number) => {
     await supabase.from("notes").delete().eq("id", id);
     fetchNotes();
-  }
+  };
+
+  const updateNote = async (id: number, title: string) => {
+    await supabase.from("notes").update({ title }).eq("id", id);
+    fetchNotes();
+  };
 
   return (
     <section className="space-y-4 border rounded-xl p-4">
-      <h2 className="text-xl font-bold">Client Component Notes</h2>
-
-      {/* CREATE */}
-      <form onSubmit={addNote} className="flex gap-2">
-        <input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="New note title..."
-          className="flex-1 rounded border border-gray-300 px-3 py-2"
-        />
-        <button
-          type="submit"
-          className="rounded bg-green-600 px-4 py-2 text-white hover:opacity-90"
-        >
-          Add
-        </button>
-      </form>
-
-      {/* LIST + DELETE */}
-      <ul className="space-y-2">
-        {notes.map((n) => (
-          <li
-            key={n.id}
-            className="flex items-center justify-between border rounded px-3 py-2"
-          >
-            {n.title}
-            <button
-              onClick={() => deleteNote(n.id)}
-              className="text-red-600 hover:underline"
-            >
-              Delete
-            </button>
-          </li>
-        ))}
-        {notes.length === 0 && <li className="text-gray-500">No notes yet.</li>}
-      </ul>
+      <h2 className="text-xl font-bold">Notes App (Client Component)</h2>
+      <NoteFormClient onAdd={addNote} />
+      <NoteListClient notes={notes} onDelete={deleteNote} onUpdate={updateNote} />
     </section>
   );
 }
