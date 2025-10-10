@@ -1,3 +1,5 @@
+//see commit sai varem tehtud, aga middleware.ts tehtud muudatused said lõpus postmani ka tööle, enne töötas ainult browseris
+
 export async function GET() {
   return Response.json({ message: 'get' })
 } 
