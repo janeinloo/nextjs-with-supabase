@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server"
 import { revalidatePath } from "next/cache"
 import TodoForm from "./server/TodoForm"
 import TodoList from "./server/TodoList"
-import ClientTodo from "./ClientTodo" // optional client component
+import ClientTodo from "./ClientTodo"
 
 export default async function TodoPage() {
   const supabase = await createClient()
